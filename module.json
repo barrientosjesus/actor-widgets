@@ -34,7 +34,8 @@
     "actorviewer.js"
   ],
   "scripts": [
-    "scripts/dnd5e.js"
+    "scripts/dnd5e.js",
+    "scripts/foundryFilePicker.js"
   ],
   "styles": [
     "styles/externalactor.css"
