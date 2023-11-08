@@ -21,7 +21,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("setup", async () => {
-  await FilePicker.createDirectory("data", "actorAPI", {}).catch(() => {});
+  await FilePicker.createDirectory("data", "actorAPI", {}).catch(() => { });
 
   const hookNotExecuted = Hooks.call("actorViewerGenerate");
 
@@ -73,7 +73,7 @@ Hooks.on("renderActorSheet", (sheet, html) => {
 });
 
 class CopyPopupApplication extends Application {
-  constructor(url, options = {}) {
+  constructor (url, options = {}) {
     super(options);
 
     this.url = url;
@@ -149,7 +149,7 @@ function createActorsFile(actors) {
  */
 function createWorldsFile() {
   let worlds = [];
-  const world = {'name': game.world.data.name, 'title': game.world.data.title, 'system': game.world.data.system};
+  const world = { 'name': game.world.data.name, 'title': game.world.data.title, 'system': game.world.data.system };
   console.debug('ActorViewer |', 'Checking for existing worlds.json');
   fetch(`${window.location.href.replace("/game", "")}/actorAPI/worlds.json`)
     .then((response) => response.json())
@@ -176,12 +176,7 @@ function createWorldsFile() {
  * @returns {Promise}
  */
 async function upload(source, path, file, options) {
-  if (typeof ForgeVTT_FilePicker !== "undefined") {
-    const SilentForgeFilePicker = (await import("./customFilepickers/forgeFilePicker.js")).default;
-    return await SilentForgeFilePicker.upload(source, path, file, options);
-  } else {
-    return await SilentFilePicker.upload(source, path, file, options);
-  }
+  return await SilentFilePicker.upload(source, path, file, options);
 }
 
 globalThis.ActorViewer = {
