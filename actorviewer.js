@@ -1,4 +1,4 @@
-import SilentFilePicker from "./customFilepickers/foundryFilePicker.js";
+import SilentFilePicker from "./scripts/foundryFilePicker.js";
 
 let filePath = window.location.href.replace("/game", "");
 
