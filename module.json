@@ -1,34 +1,34 @@
 {
-  "id": "module",
-  "title": "New Module",
-  "description": "",
+  "id": "actor-widgets",
+  "title": "Actor Widgets",
+  "description": "Opens an API to an app for rendering actor data in the browser.",
   "version": "#{VERSION}#",
   "library": "false",
   "manifestPlusVersion": "1.2.0",
   "compatibility": {
-    "minimum": 10,
-    "verified": 10,
+    "minimum": 11,
+    "verified": 11,
     "maximum": 11
   },
   "authors": [
     {
-      "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers",
-      "discord": "discordID#0001"
+      "name": "Chuey",
+      "url": "https://github.com/barrientosjesus",
+      "discord": "chuey"
     }
   ],
   "relationships": {
-    "systems": [],
+    "systems": ["dnd5e"],
     "requires": []
   },
   "esmodules": [
-    "scripts/module.js"
+    "actorviewer.js"
   ],
   "scripts": [
-    "scripts/lib/lib.js"
+    "modules/dnd5e.js"
   ],
   "styles": [
-    "styles/module.css"
+    "css/externalactor.css"
   ],
   "languages": [
     {
@@ -38,6 +38,7 @@
     }
   ],
   "url": "#{URL}#",
+  "socket": true,
   "manifest": "#{MANIFEST}#",
   "download": "#{DOWNLOAD}#",
   "license": "LICENSE",
