@@ -34,10 +34,10 @@
     "actorviewer.js"
   ],
   "scripts": [
-    "modules/dnd5e.js"
+    "scripts/dnd5e.js"
   ],
   "styles": [
-    "css/externalactor.css"
+    "styles/externalactor.css"
   ],
   "languages": [
     {
