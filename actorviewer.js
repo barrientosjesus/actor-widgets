@@ -3,12 +3,21 @@ import SilentFilePicker from "./customFilepickers/foundryFilePicker.js";
 let filePath = window.location.href.replace("/game", "");
 
 Hooks.once("init", () => {
-  game.settings.register("externalactor", "systemSite", {
+  game.settings.register("actor-widgets", "systemSite", {
     scope: "client",
     type: String,
-    default: "https://ardittristan.github.io/VTTExternalActorSite/",
+    default: "https://actor-widget-site-8099a1eac7b4.herokuapp.com/",
     config: false,
   });
+  game.settings.register("actor-widgets", "includeNPC", {
+    scope: "world",
+    type: Boolean,
+    default: false,
+    config: true,
+    name: "Include NPCs",
+    hint:
+      "Check this if you want to include NPCs.",
+  })
 });
 
 Hooks.once("setup", async () => {
@@ -21,44 +30,44 @@ Hooks.once("setup", async () => {
 
     let actors = {};
     game.actors.forEach((actor) => {
-      const compatMode = game.settings.get("externalactor", "compatMode");
+      const includeNPC = game.settings.get("actor-widgets", "includeNPC");
+      if (!includeNPC && actor.type === 'npc') return;
       let items = [];
 
-      if (!compatMode) {
+      if (game.user.isGM) {
+        actor.setFlag("actor-widgets", "classLabels", actor.itemTypes.class.map((c) => c.name).join(", "));
+      }
+
+      actor.items.forEach((item) => {
         if (game.user.isGM) {
-          actor.setFlag("externalactor", "classLabels", actor.itemTypes.class.map((c) => c.name).join(", "));
+          item.setFlag("actor-widgets", "labels", item.labels);
         }
+        items.push(item.system);
+      });
 
-        actor.items.forEach((item) => {
-          if (game.user.isGM) {
-            item.setFlag("externalactor", "labels", item.labels);
-          }
-          items.push(item.data);
-        });
-      }
+      actors[actor.id] = JSON.parse(JSON.stringify(actor.system));
+      actors[actor.id].items = JSON.parse(JSON.stringify(items));
+      actors[actor.id].name = JSON.parse(JSON.stringify(actor.name));
 
-      actors[actor.id] = JSON.parse(JSON.stringify(actor.data));
-      if (!compatMode) {
-        actors[actor.id].items = JSON.parse(JSON.stringify(items));
-      }
     });
 
     // create json files
     ActorViewer.createActorsFile(actors);
     ActorViewer.createWorldsFile();
     // set application button url
-    game.settings.set("externalactor", "systemSite", "https://ardittristan.github.io/VTTExternalActorSite/");
+    game.settings.set("actor-widgets", "systemSite", "https://actor-widget-site-8099a1eac7b4.herokuapp.com/");
   }
 });
 
-Hooks.on("renderActorSheet", (sheet, html) => {
-  jQuery('<a class="character-id"><i class="fas fa-link"></i>Get id</a>').insertAfter(html.find(".window-title"));
+Hooks.on("renderActorSheet", async (sheet, html) => {
+  jQuery('<a class="character-id"><i class="fas fa-link"></i>Widgets</a>').insertAfter(html.find(".window-title"));
+  const inviteLinks = await getInviteLinks();
 
   html.find(".character-id").on("click", () => {
     if (filePath.includes("https://")) {
       new CopyPopupApplication(filePath + sheet.actor.id).render(true);
     } else {
-      new CopyPopupApplication(`${window.location.href.replace("/game", "")}/actorAPI/${game.world.data.name}-actors.json${sheet.actor.id}`).render(true);
+      new CopyPopupApplication(inviteLinks.remote).render(true);
     }
   });
 });
@@ -73,8 +82,8 @@ class CopyPopupApplication extends Application {
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       id: "copyPopup",
-      title: game.i18n.localize("actorViewer.actorUrl"),
-      template: "modules/externalactor/templates/copyPopup.html",
+      title: game.i18n.localize("actorWidgets.widgetSite"),
+      template: "modules/actor-widgets/templates/copyPopup.html",
       classes: ["copy-url-window"],
       resizable: false,
     });
@@ -89,14 +98,15 @@ class CopyPopupApplication extends Application {
   /**
    * @param  {JQuery} html
    */
-  activateListeners(html) {
+  async activateListeners(html) {
     super.activateListeners(html);
+    const inviteLinks = await getInviteLinks();
 
     html.find(".close").on("click", () => {
       this.close();
     });
     html.find(".sendToApp").on("click", () => {
-      Object.assign(document.createElement("a"), { target: "_blank", href: game.settings.get("externalactor", "systemSite") + "?" + this.url }).click();
+      Object.assign(document.createElement("a"), { target: "_blank", href: game.settings.get("actor-widgets", "systemSite") + "?remote_url=" + inviteLinks.remote  }).click();
     });
     html.find(".copyButton").on("click", () => {
       copyToClipboard(this.url);
@@ -114,8 +124,6 @@ async function createJsonFile(fileName, content) {
 
   let response = await upload("data", "actorAPI", file, {});
   filePath = response.path;
-
-  console.log('ActorViewer |', response);
 }
 
 function copyToClipboard(text) {
@@ -126,13 +134,13 @@ function copyToClipboard(text) {
   document.addEventListener("copy", listener);
   document.execCommand("copy");
   document.removeEventListener("copy", listener);
-  ui.notifications.info(game.i18n.localize("actorViewer.copied"));
+  ui.notifications.info(game.i18n.localize("actorWidgets.copied"));
 }
 /**
  * @param  {Actor[]} actors
  */
 function createActorsFile(actors) {
-  createJsonFile(`${game.world.data.name}-actors.json`, JSON.stringify(actors));
+  createJsonFile(`actors-list.json`, JSON.stringify(actors));
 }
 
 /**
@@ -140,14 +148,14 @@ function createActorsFile(actors) {
  */
 function createWorldsFile() {
   let worlds = [];
-  const world = { 'name': game.world.data.name, 'title': game.world.data.title, 'system': game.world.data.system };
+  const world = { 'name': game.world.id, 'title': game.world.title, 'system': game.world.system };
   console.debug('ActorViewer |', 'Checking for existing worlds.json');
   fetch(`${window.location.href.replace("/game", "")}/actorAPI/worlds.json`)
     .then((response) => response.json())
     .then((data) => {
       console.debug('ActorViewer |', 'Existing worlds.json data', data);
       worlds = data;
-      if (!worlds.some(w => w.name === game.world.data.name)) {
+      if (!worlds.some(w => w.name === game.world.id)) {
         worlds.push(world);
         console.debug('ActorViewer |', 'Writing data to worlds.json', worlds);
         createJsonFile('worlds.json', JSON.stringify(worlds));
@@ -170,8 +178,15 @@ async function upload(source, path, file, options) {
   return await SilentFilePicker.upload(source, path, file, options);
 }
 
+async function getInviteLinks() {
+  let inviteLinks = new InvitationLinks();
+  let inviteData = await inviteLinks.getData();
+  return { local: inviteData.local, remote: inviteData.remote };
+}
+
 globalThis.ActorViewer = {
   createActorsFile: createActorsFile,
   createWorldsFile: createWorldsFile,
   copyToClipboard: copyToClipboard,
 };
+
