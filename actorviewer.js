@@ -9,15 +9,6 @@ Hooks.once("init", () => {
     default: "https://ardittristan.github.io/VTTExternalActorSite/",
     config: false,
   });
-  game.settings.register("externalactor", "compatMode", {
-    scope: "world",
-    type: Boolean,
-    default: false,
-    config: true,
-    name: "Enable performance mode.",
-    hint:
-      "If this module causes performance loss on startup. You can disable certain features with this option. Keep in mind that this'll mean that some data doesn't get exported.",
-  });
 });
 
 Hooks.once("setup", async () => {
