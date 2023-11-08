@@ -1,10 +1,8 @@
 {
-    "actorViewer": {
-        "actorUrl": "Actor URL",
+    "actorWidgets": {
+        "widgetSite": "Widget Site",
         "popup": {
-            "goTo": "Go To Application",
-            "copy": "Copy Actor URL",
-            "close": "Close"
+            "goTo": "Go To Site"
         },
         "copied": "Copied to clipboard"
     }
