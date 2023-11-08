@@ -3,7 +3,6 @@
   "title": "Actor Widgets",
   "description": "Opens an API to an app for rendering actor data in the browser.",
   "version": "#{VERSION}#",
-  "library": "false",
   "manifestPlusVersion": "1.2.0",
   "compatibility": {
     "minimum": 11,
