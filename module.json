@@ -31,7 +31,7 @@
     "requires": []
   },
   "esmodules": [
-    "actorviewer.js"
+    "scripts/actorviewer.js"
   ],
   "scripts": [
     "scripts/dnd5e.js",
