@@ -48,7 +48,7 @@ async function createActorJSON(hookName = '') {
         }
 
         if (hookName === 'createActiveEffect' || hookName === 'deleteActiveEffect' || hookName === 'init') {
-          const firstStatus = actor.effects.find(eff => eff.statuses.size > 0) || { icon: '', name: '' };
+          const firstStatus = actor.effects.find(eff => eff.statuses.size > 0 && eff.sourceName === actor.name) || { icon: '', name: '' };
           updateData[actor.id].status = firstStatus.icon === '' ? firstStatus : shrinkStatus(firstStatus);
         }
 
